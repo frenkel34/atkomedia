@@ -1,12 +1,35 @@
 <!DOCTYPE HTML>
-<!--
-	Helios by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
+<script>
+// CONFIGURATION
+	var authorize_endpoint	= 'https://media.atkoinc.nl/oauth2/v1/authorize';
+	var client_id 			= '0oa1gxcshv1VFSDhm0x7'; 
+	var scopes				= 'openid profile email';
+	var redirectURI 		= window.location.href;
+
+	function getParameterByName( name ) {
+		name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+		var regexS = "[\\#?&]"+name+"=([^&#]*)";
+		var regex = new RegExp( regexS );
+		var results = regex.exec( window.location.href );
+		if( results == null )
+			return "";
+		else
+			return decodeURIComponent(results[1].replace(/\+/g, " "));
+	}		
+
+	function parseJwt(token) {
+		if (token != null) {
+			var base64Url = token.split('.')[1];
+			var base64 = base64Url.replace('-', '+').replace('_', '/');
+			return JSON.parse(window.atob(base64));
+		} else {
+			logEvent('event occured: a invalid or empty token was parsed',5);
+		}
+	};
+</script>
 <html>
 	<head>
-		<title>Atkomedia :: Rock your socks off!</title>
+		<title>Atkomedia :: We will rock your socks off!</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
 		<link rel="stylesheet" href="assets/css/main.css" />
@@ -74,18 +97,20 @@
 				<div class="wrapper style2">
 					<article id="main" class="container special">
 						<header>
-							<a href="#" class="button">View tokens</a>
+							<span class="button btn_toggletokens">View tokens</span>
+							<span class="button btn_fatidtoken">get fat ID token</span>
 						</header>
-						<pre style="display:none;">
-							Commodo id natoque malesuada sollicitudin elit suscipit. Curae suspendisse mauris posuere accumsan massa
-							posuere lacus convallis tellus interdum. Amet nullam fringilla nibh nulla convallis ut venenatis purus
-							sit arcu sociis. Nunc fermentum adipiscing tempor cursus nascetur adipiscing adipiscing. Primis aliquam
-							mus lacinia lobortis phasellus suscipit. Fermentum lobortis non tristique ante proin sociis accumsan
-							lobortis. Auctor etiam porttitor phasellus tempus cubilia ultrices tempor sagittis. Nisl fermentum
-							consequat integer interdum integer purus sapien. Nibh eleifend nulla nascetur pharetra commodo mi augue
-							interdum tellus. Ornare cursus augue feugiat sodales velit lorem. Semper elementum ullamcorper lacinia
-							natoque aenean scelerisque.
-						</pre>
+						<div class="cnt_tokens" style="display:none;">
+							<h2 id="lbl_h2_raw_id">The raw id_token is: </h2>
+							<p><pre id="lbl_token_raw_id" style="font-family: 'Courier New';"></pre></p>
+							<h2 id="lbl_h2_pretty_id">The pretty id_token is: </h2>
+							<p><pre id="lbl_token_pretty_id" style="font-family: 'Courier New';"></pre></p>
+							<h2 id="lbl_h2_raw">The raw access_token is: </h2>
+							<p><pre id="lbl_token_raw" style="font-family: 'Courier New';"></pre></p>
+							<h2 id="lbl_h2_pretty">The pretty access_token is: </h2>
+							<p><pre id="lbl_token_pretty" style="font-family: 'Courier New';"></pre></p>
+							<p></p>
+						</div>
 					</article>
 				</div>
 
@@ -331,3 +356,50 @@
 
 	</body>
 </html>
+<script type="text/javascript">
+	$(".btn_fatidtoken").click(function() {
+		 
+		window.location = authorize_endpoint + '?client_id='+ client_id+'&response_type=id_token&scope='+ scopes +'&state=x&nonce=y&redirect_uri='+ redirectURI +'';
+	})
+
+	$(".btn_toggletokens").click(function() {
+		$(".cnt_tokens").slideToggle();
+	});
+
+	var appUrl = window.location.href.split('#')[0];
+	var token_raw = getParameterByName('access_token');
+	var token_raw_id = getParameterByName('id_token');
+	var error = getParameterByName('error_description');
+	console.log(token_raw);
+	if (token_raw == '' && token_raw_id == '') {
+		if (error != '') {
+			alert(error);
+		} else {
+			window.location = authorize_endpoint + '?client_id='+ client_id+'&response_type=token id_token&scope='+ scopes +'&state=x&nonce=y&redirect_uri='+ redirectURI +''
+		}
+	} else {
+		if (token_raw != '') {
+			var token_pretty = token_raw
+			token_pretty = parseJwt(token_pretty);
+			console.log('access_token')
+			console.log(token_pretty);
+			token_pretty = JSON.stringify(token_pretty, undefined, 2);
+			$("#lbl_token_pretty").text(token_pretty);	
+			$("#lbl_h2_pretty").show();
+			$("#lbl_token_raw").text(token_raw);
+			$("#lbl_h2_raw").show();
+		}
+
+		if (token_raw_id != '') {
+			var token_pretty_id = token_raw_id
+			token_pretty_id = parseJwt(token_pretty_id);
+			console.log(token_pretty_id);
+			token_pretty_id = JSON.stringify(token_pretty_id, undefined, 2);
+			$("#lbl_token_pretty_id").text(token_pretty_id);	
+			$("#lbl_h2_pretty_id").show();
+			$("#lbl_token_raw_id").text(token_raw_id);
+			$("#lbl_h2_raw_id").show();
+
+		}
+	}
+</script>
