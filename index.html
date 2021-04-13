@@ -1,7 +1,8 @@
 <!DOCTYPE HTML>
 <script>
 // CONFIGURATION
-	var authorize_endpoint	= 'https://media.atkoinc.nl/oauth2/v1/authorize';
+	var oktaOrg				= 'https://media.atkoinc.nl'
+	var authorize_endpoint	= oktaOrg + '/oauth2/v1/authorize';
 	var client_id 			= '0oa1gxcshv1VFSDhm0x7'; 
 	var scopes				= 'openid profile email';
 	var redirectURI 		= window.location.href;
@@ -56,29 +57,29 @@
 					<!-- Nav -->
 						<nav id="nav">
 							<ul>
-								<li><a href="index.html">Home</a></li>
+								<li><a href="/">Home</a></li>
 								<li>
-									<a href="#">Products</a>
+									<a>Products</a>
 									<ul>
-										<li><a href="#">Streaming sevices</a></li>
-										<li><a href="#">Music</a></li>
-										<li><a href="#">Video and Film</a></li>
-										<li><a href="#">Art</a></li>
+										<li><a>Streaming sevices</a></li>
+										<li><a>Music</a></li>
+										<li><a>Video and Film</a></li>
+										<li><a>Art</a></li>
 										<li>
-											<a href="#">More &hellip;</a>
+											<a>More &hellip;</a>
 											<ul>
-												<li><a href="#">Modern</a></li>
-												<li><a href="#">Classic</a></li>
-												<li><a href="#">Mixed</a></li>
-												<li><a href="#">Everything</a></li>
+												<li><a>Modern</a></li>
+												<li><a>Classic</a></li>
+												<li><a>Mixed</a></li>
+												<li><a>Everything</a></li>
 											</ul>
 										</li>
-										<li><a href="#">Terms</a></li>
+										<li><a>Terms</a></li>
 									</ul>
 								</li>
-								<li><a href="left-sidebar.html">About us</a></li>
-								<li><a href="right-sidebar.html">News</a></li>
-								<li><a href="no-sidebar.html">Artists</a></li>
+								<li><a>About us</a></li>
+								<li><a>News</a></li>
+								<li><a href="" style="display: none;" class="btn_logout">Logout</a></li>
 							</ul>
 						</nav>
 
@@ -357,8 +358,11 @@
 	</body>
 </html>
 <script type="text/javascript">
+	$(".btn_logout").click(function() {
+		window.location = oktaOrg + '/login/signout?fromURI='+ redirectURI;
+	})
+
 	$(".btn_fatidtoken").click(function() {
-		 
 		window.location = authorize_endpoint + '?client_id='+ client_id+'&response_type=id_token&scope='+ scopes +'&state=x&nonce=y&redirect_uri='+ redirectURI +'';
 	})
 
@@ -379,6 +383,7 @@
 		}
 	} else {
 		if (token_raw != '') {
+			$(".btn_logout").show();
 			var token_pretty = token_raw
 			token_pretty = parseJwt(token_pretty);
 			console.log('access_token')
@@ -391,6 +396,7 @@
 		}
 
 		if (token_raw_id != '') {
+			$(".btn_logout").show();
 			var token_pretty_id = token_raw_id
 			token_pretty_id = parseJwt(token_pretty_id);
 			console.log(token_pretty_id);
